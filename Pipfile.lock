@@ -1,0 +1,33 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "43b79e292a9e2051740cacdc792bf3bdf6f98472fdbe4bfa9c754576bf404a24"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.4"
+        },
+        "sources": [
+            {
+                "name": "pypi",
+                "url": "https://pypi.python.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {
+        "tensorflow-gpu": {
+            "hashes": [
+                "sha256:57cf687f8cebb1d15a35c414e7d75be51c31c2acd9cbf53d237ca8151e04eedc",
+                "sha256:718e640554b0911ad0034d42738cde8f6f820083e5e83ad0fc24ece2db419da7",
+                "sha256:8f1f89ffecd892b70fd1f2e3bc6b8ac79e07d19932f1f763d5b55d5fc1d7090e",
+                "sha256:9ad09ce852d33e8e43268739744a7a92f289e0d1ac09d3689457ebcd43705c40",
+                "sha256:9f9c0125eb7cc259c3f7824b6491bffdcbbdd888950148f7844f9baee19fc66b",
+                "sha256:d834abbad421ccdcf1406c524857bb097852a8899f2d8ab642ff361160011ac6",
+                "sha256:e63d1c9d2a7af5bb46b321f6308c932d8648dab6354e621a664a568d896069ca"
+            ],
+            "version": "==1.4"
+        }
+    },
+    "develop": {}
+}
