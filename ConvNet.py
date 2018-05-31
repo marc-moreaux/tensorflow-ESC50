@@ -24,16 +24,11 @@ def conv_net(features, labels, mode, params):
     with tf.variable_scope('ConvNet'):
         x = features #features['sound']
         # x = tf.Print(x, [x], 'my x bitch')
-        x = tf.layers.conv1d(x, 32, 5, activation=tf.nn.relu)
-        x = tf.layers.batch_normalization(x, training=is_training)
-        x = tf.layers.max_pooling1d(x, 2, 2)
-
-        x = tf.layers.conv1d(x, 64, 3, activation=tf.nn.relu)
-        x = tf.layers.batch_normalization(x, training=is_training)
-        x = tf.layers.max_pooling1d(x, 2, 2)
-
-        x = tf.layers.conv1d(x, n_classes, 3, activation=tf.nn.relu)
-        x = tf.layers.batch_normalization(x, training=is_training)
+        for _ in range(12):
+            x = tf.layers.conv1d(x, 64, 3, strides=2, activation=tf.nn.relu)
+            x = tf.layers.batch_normalization(x, training=is_training)
+        
+        x = tf.layers.conv1d(x, n_classes, 3, strides=2)
         x = tf.reduce_mean(x, [1])
 
         logits = x
@@ -65,12 +60,13 @@ def conv_net(features, labels, mode, params):
     
     with tf.variable_scope('train'):
         assert mode == tf.estimator.ModeKeys.TRAIN
-        optimizer = tf.train.AdagradOptimizer(learning_rate=0.1)
+        optimizer = tf.train.AdagradOptimizer(learning_rate=0.01)
         train_op = optimizer.minimize(loss, global_step=tf.train.get_global_step())
         return tf.estimator.EstimatorSpec(mode, loss=loss, train_op=train_op)
 
 
 def main(argv):
+    tf.reset_default_graph()
     classifier = tf.estimator.Estimator(
         model_fn=conv_net,
         params={
@@ -78,17 +74,11 @@ def main(argv):
         }
     )
 
-    classifier.train(
-        input_fn=dataset.train_input_function,
-        steps=1000,
-    )
-    print('3')
+    for _ in range(100):
+        classifier.train(input_fn=dataset.train_input_function)
+        # eval_result = classifier.evaluate(input_fn=dataset.val_input_function)
 
-    eval_result = classifier.evaluate(
-        input_fn=dataset.val_input_function
-    )
-
-    print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
+    # print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
 
 
 main(None)

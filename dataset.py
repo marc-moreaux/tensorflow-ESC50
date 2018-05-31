@@ -32,10 +32,8 @@ for i in range(1, opt.nFolds + 1):
         train_labels.extend(labels)
 
 
-def dataset_input_fn(sounds, labels, is_train):
+def dataset_input_fn(sounds, labels, is_train, batch_size=64):
     labels = np.array(labels).reshape((-1, 1))
-    print('plout')
-    print(len(sounds), len(labels))
     dataset = tf.data.Dataset.from_generator(
         lambda: itertools.izip_longest(sounds, labels),
         output_types=(tf.float32, tf.int32),
@@ -55,7 +53,8 @@ def dataset_input_fn(sounds, labels, is_train):
         dataset = dataset.map(U.normalize(float(2 ** 16 / 2)))
         dataset = dataset.map(U.multi_crop(opt.inputLength, opt.nCrops))
 
-    dataset = dataset.map(U.reshape([1, -1, 1]))
+    dataset = dataset.batch(batch_size)
+    dataset = dataset.map(U.reshape([batch_size, -1, 1]))
     iterator = dataset.make_one_shot_iterator()
 
     return iterator.get_next()
@@ -110,7 +109,6 @@ def get_example(iterator, train):
 
     return sound, label
 
-
 train_sound, train_label = get_example(train_iterator, train=True)
 val_sound, val_label = get_example(val_iterator, train=False)
 
@@ -120,18 +118,17 @@ def main():
     with tf.Session() as sess:
         import matplotlib.pyplot as plt
         train_iterator = train_input_function()
-        sess.run(train_iterator.initializer)
+        # sess.run(train_iterator.initializer)
         
-        for _ in range(10000):
-            results = sess.run([train_iterator])
-            a, b = results
-            print(results)
-            print(a.shape)
-            plt.plot(a.T)
+        for _ in range(10):
+            results, = sess.run([train_iterator])
+            a, lbl = results
+            a = a[0,:,0]
+            # print(a, lbl)
+            plt.plot(a)
             plt.show()
 
 
 if __name__ == '__main__':
     main()
-
 
