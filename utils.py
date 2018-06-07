@@ -1,3 +1,4 @@
+#%%
 import tensorflow as tf
 import numpy as np
 import os
@@ -17,9 +18,9 @@ def to_dataset(sounds, labels, batch_size):
     return dataset
 
 
-def get_different_sounds(iterator):
-    s1, l1 = iterator.get_next()
-    s2, l2 = iterator.get_next()
+def get_different_sounds(iterator_next):
+    s1, l1 = iterator_next
+    s2, l2 = iterator_next
     loop_vars = [s1, l1, s2, l2]
 
     def cond(s1, l1, s2, l2):
@@ -28,8 +29,8 @@ def get_different_sounds(iterator):
         return tf.equal(l1, l2)
 
     def body(s1, l1, s2, l2):
-        s1, l1 = iterator.get_next()
-        s2, l2 = iterator.get_next()
+        s1, l1 = iterator_next
+        s2, l2 = iterator_next
         return s1, l1, s2, l2
 
     loop = tf.while_loop(cond, body, loop_vars)
@@ -235,16 +236,35 @@ def mix(sound1, sound2, r, fs):
     return sound
 
 
-def kl_divergence(y, t):
+
+#%%
+def kl_divergence(logits, labels):
     zero = tf.constant(0, dtype=tf.float32)
-    where = tf.not_equal(y, zero)
-    sound_non_zero = tf.boolean_mask(y, where)
+    labels = tf.cast(labels, tf.float32)
+    where = tf.not_equal(labels, zero)
+    sound_non_zero = tf.boolean_mask(labels, where)
 
     entropy = - tf.reduce_sum(sound_non_zero * tf.log(sound_non_zero))
-    crossEntropy = - tf.reduce_sum(t * tf.nn.log_softmax(y))
-    kl_dvg = (crossEntropy - entropy) / tf.cast(y.shape[0], tf.float32)
+    crossEntropy = labels * tf.nn.log_softmax(logits)
+    crossEntropy = - tf.reduce_sum(crossEntropy)
+    kl_dvg = (crossEntropy - entropy) / tf.cast(logits.shape[0], tf.float32)
 
     return kl_dvg
 
 
 # Convert time representation
+
+
+
+# For testing purposes
+# logits = np.array([[.1,.9,0],[.8,.2,0]])
+# labels = np.array([[0,1,0],[1,0,0]])
+
+# logits = tf.constant(logits, dtype=tf.float32)
+# labels = tf.constant(labels, dtype=tf.int32)
+
+# print(logits[0])
+# with tf.Session() as sess:
+#     op = kl_divergence(logits, labels)
+#     results, = sess.run([op])
+#     print (results)
