@@ -41,7 +41,7 @@ def get_different_sounds(iterator_next):
 # General loading functions
 def fake_parse():
     from argparse import Namespace
-    args = Namespace(save='/home/moreaux/work/bc_learning_sound/results/esc10_att_7b/',
+    args = Namespace(save='/home/moreaux-gpu/work/bc_learning_sound/results/esc10_att_7b/',
                      split=[1, ],
                      noiseAugment=False,
                      inputLength=0)
@@ -54,6 +54,7 @@ def fix_opt(opt):
         opt.save = opt.save.replace('results_', 'results/')
     if not 'noiseAugment' in opt:
         opt.noiseAugment = False
+    opt.data = opt.data.replace('moreaux', 'moreaux-gpu')
     return opt
 
 

@@ -1,19 +1,16 @@
 [[source]]
-
 name = "pypi"
 verify_ssl = true
 url = "https://pypi.python.org/simple"
 
-
 [packages]
-
-tensorflow-gpu = "==1.4"
-
+tensorflow-gpu = "==1.8"
+ipython = "*"
+pillow = "*"
+cython = "*"
+jupyter = "*"
 
 [dev-packages]
 
-
-
 [requires]
-
-python_version = "3.4"
+python_version = "3.5"

@@ -4,7 +4,7 @@
 from __future__ import division, print_function, absolute_import
 import tensorflow as tf
 import dataset
-reload(dataset)
+#reload(dataset)
 import utils
 
 use_BC=True

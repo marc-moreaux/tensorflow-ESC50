@@ -1,13 +1,15 @@
 #%%
 import tensorflow as tf
-from tensorflow.contrib.data import Dataset, Iterator
 import os
 import itertools
 import numpy as np
 import utils
 import utils as U
-reload(utils)
+#reload(utils)
 U = utils
+
+Dataset = tf.data.Dataset 
+Iterator = tf.data.Iterator
 
 
 def get_split(opt, split):
@@ -30,7 +32,7 @@ def get_split(opt, split):
 
 args = U.fake_parse()
 opt = U.load_opt(args.save, 1)
-dataset = np.load(os.path.join(opt.data, opt.dataset, 'wav{}.npz'.format(opt.fs // 1000)))
+dataset = np.load(os.path.join(opt.data, opt.dataset, 'wav{}.npz'.format(opt.fs // 1000)), encoding="latin1")
 mix = opt.BC
 
 
@@ -47,7 +49,7 @@ def dataset_input_fn(is_train, batch_size=64, split=1):
     sounds, labels = train[split-1] if is_train is True else val[split-1]
     labels = np.array(labels).reshape((-1, 1))
     dataset = tf.data.Dataset.from_generator(
-        lambda: itertools.izip_longest(sounds, labels),
+        lambda: zip(sounds, labels),
         output_types=(tf.float32, tf.int32),
         output_shapes=(tf.TensorShape([None]),
                        tf.TensorShape(1)))
