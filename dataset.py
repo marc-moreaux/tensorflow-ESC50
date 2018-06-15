@@ -43,6 +43,8 @@ for _s in range(1, 6):
     _train, _val = get_split(opt, _s)
     train.append(_train)
     val.append(_val)
+train = tuple(train)
+val = tuple(val)
 
 
 def dataset_input_fn(is_train, batch_size=64, split=1):
@@ -60,7 +62,7 @@ def dataset_input_fn(is_train, batch_size=64, split=1):
     dataset = dataset.map(U.padding(opt.inputLength // 2))
     dataset = dataset.map(U.random_crop(opt.inputLength))
     dataset = dataset.map(U.normalize(float(2 ** 16 / 2)))
-    dataset = dataset.shuffle(100)
+    dataset = dataset.shuffle(1000)
 
     # else:
     #     # if not opt.longAudio:
