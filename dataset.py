@@ -39,12 +39,18 @@ mix = opt.BC
 # Split train and val
 train = []
 val = []
-for _s in range(1, 6):
+for _s in range(5):
     _train, _val = get_split(opt, _s)
+    for _ in range(3):
+        _train[0].extend(_train[0])
+        _train[1].extend(_train[1])
+        _val[0].extend(_val[0])
+        _val[1].extend(_val[1])
     train.append(_train)
     val.append(_val)
-train = tuple(train)
-val = tuple(val)
+
+# train = tuple(train)
+# val = tuple(val)
 
 
 def dataset_input_fn(is_train, batch_size=64, split=1):
