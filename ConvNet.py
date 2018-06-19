@@ -18,14 +18,16 @@ def conv_net(features, labels, mode, params):
     use_BC: use kl dvg or not
     '''
     n_classes = params['n_classes']
-    is_training = mode == tf.estimator.ModeKeys.TRAIN
+    is_training = bool(mode == tf.estimator.ModeKeys.TRAIN)
+    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     print (is_training)
     
     x = features #features['sound']
     x = tf.Print(x, [labels, x], 'lbl et x')
     for _ in range(12):
-        x = tf.layers.conv1d(x, 64, 3, strides=2, activation=tf.nn.relu)
-#        x = tf.layers.batch_normalization(x, training=is_training)
+        x = tf.layers.conv1d(x, 64, 3, strides=2)
+        x = tf.layers.batch_normalization(x, training=is_training)
+        x = tf.nn.relu(x)
 
     x = tf.layers.conv1d(x, n_classes, 3, strides=2)
     x = tf.reduce_mean(x, [1])
@@ -43,10 +45,10 @@ def conv_net(features, labels, mode, params):
             'logits': logits,
         }
         return tf.estimator.EstimatorSpec(mode, predictions=predictions)
-
-    loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
-    labels = tf.Print(labels, [labels], 'lbl')
-    predicted_classes = tf.Print(predicted_classes, [predicted_classes], 'pred')
+    with tf.control_dependencies(update_ops):
+        loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+        labels = tf.Print(labels, [labels], 'lbl')
+        predicted_classes = tf.Print(predicted_classes, [predicted_classes], 'pred')
 
     # Compute evaluation metrics.
     accuracy = tf.metrics.accuracy(labels=labels,
@@ -63,12 +65,12 @@ def conv_net(features, labels, mode, params):
 
     # Train mode
     assert mode == tf.estimator.ModeKeys.TRAIN
-    loss = tf.Print(loss, [loss, predicted_classes])
-    optimizer = tf.train.AdagradOptimizer(learning_rate=0.01)
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
+        loss = tf.Print(loss, [loss, predicted_classes])
+        optimizer = tf.train.AdagradOptimizer(learning_rate=0.01)
         train_op = optimizer.minimize(loss, global_step=tf.train.get_global_step())
-    return tf.estimator.EstimatorSpec(mode, loss=loss, train_op=train_op)
+        return tf.estimator.EstimatorSpec(mode, loss=loss, train_op=train_op)
 
 
 def main(argv):
@@ -82,7 +84,7 @@ def main(argv):
 
     for _ in range(5):
         classifier.train(input_fn=lambda : dataset.dataset_input_fn(True, 8))
-        eval_result = classifier.evaluate(input_fn=lambda : dataset.dataset_input_fn(False, 8))
+        eval_result = classifier.evaluate(input_fn=lambda : dataset.dataset_input_fn(True, 8))
         print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
         print(eval_result)
         # predictions = list(classifier.predict(input_fn=lambda : dataset.dataset_input_fn(True, 8)))
