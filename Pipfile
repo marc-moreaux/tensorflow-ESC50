@@ -9,6 +9,7 @@ ipython = "*"
 pillow = "*"
 cython = "*"
 jupyter = "*"
+keras = "*"
 
 [dev-packages]
 
